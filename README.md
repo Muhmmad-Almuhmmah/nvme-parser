@@ -9,6 +9,7 @@ Read, write, parse and dump your nvme block through adb!
 * Use this tool at your own risk. I am not responsible for bricked devices. Please backup NVME before modifying any value.
 * Avoid modifying encrypted values ​​(FBLOCK, WVLOCK, FRPLOCK, etc). These values can be only rewritten with their SHA256 hash.
 * When reporting an issue, make sure to hide sensitive information (such as S/N, MACs, etc).
+* If the tool isn't able to find a valid nvme block, you'll need to provide it as the last argument.
 
 ## 📜 Requirements
 * Huawei phone.
@@ -18,8 +19,8 @@ Read, write, parse and dump your nvme block through adb!
 ## ✔️ Features
 * Read NVME values => `./nvme -r VALUE_NAME`
 * Write NVME values => `./nvme -w VALUE_NAME NEW_VALUE`
-* Dump the NVME block (dd) => `./nvme -b [optional] dump_path`
-* Restore NVME dump (dd) => `./nvme -e [optional] backup_path`
+* Dump the NVME block (dd) => `./nvme -b dump_path`
+* Restore NVME dump (dd) => `./nvme -e backup_path`
 
 ## 💻 Building the tool
 * If you want to compile this tool, you will need the android NDK kit.

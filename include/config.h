@@ -8,12 +8,6 @@
 #define MAX_GAP_SPACE 20
 
 /*
- * This is the default path for backups. It will be used
- * only if none of the nvme paths was accessible.
- */
-#define DEFAULT_BACKUP_PATH "/data/local/tmp/nvme.img"
-
-/*
  * The huawei NVME image resides in a block under the /dev folder.
  * Since most phones (nowadays) follow the standard partition scheme, 
  * instead of trying to find the block, try these two routes and ask

@@ -29,14 +29,14 @@
 #include "config.h"
 #include "helper.h"
 
-size_t nve_get_offset(char *value)
+size_t nve_get_offset(char *nve_block, char *value)
 {
     int fd;
     off_t length;
     void *data, *ptr;
     size_t offset;
     
-    fd = open(__find_block(), O_RDONLY);
+    fd = open(nve_block, O_RDONLY);
     if (fd < 0)
        return -1;
     
@@ -54,14 +54,14 @@ size_t nve_get_offset(char *value)
     return offset;
 }
 
-char *nve_read_by_offset(size_t offset)
+char *nve_read_by_offset(char *nve_block, size_t offset)
 {
     FILE *fd;
     char c[1];
     size_t pos;
     char *value = malloc(BUFFER_SIZE);
     
-    fd = fopen(__find_block(), "r");
+    fd = fopen(nve_block, "r");
     if (fd < 0)
         return NULL;
      
@@ -76,15 +76,16 @@ char *nve_read_by_offset(size_t offset)
     }
     
     fclose(fd);
+    
     return value;
 }
 
-int nve_write_by_offset(size_t offset, char *data)
+int nve_write_by_offset(char* nve_block, size_t offset, char *data)
 {
     int fd;
     char data_initial;
     
-    fd = open(__find_block(), O_CREAT|O_RDWR, S_IRUSR|S_IWUSR);
+    fd = open(nve_block, O_CREAT|O_RDWR, S_IRUSR|S_IWUSR);
     if (fd < 0)
         return -1;
     
@@ -104,6 +105,6 @@ int nve_calc_space(char *value) {
     return (MAX_GAP_SPACE - strlen(value));
 }
 
-int nve_check_header() {
-    return (nve_get_offset(HEADER1) != 19 || nve_get_offset(HEADER2) != 19 ? 0 : -1);
+int nve_check_header(char* nve_block) {
+    return (nve_get_offset(nve_block, HEADER1) != 19 || nve_get_offset(nve_block, HEADER2) != 19 ? 0 : -1);
 }
