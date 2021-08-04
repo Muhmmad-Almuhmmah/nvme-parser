@@ -54,6 +54,53 @@ size_t nve_get_offset(char *nve_block, char *value)
     return offset;
 }
 
+int nve_set_fblock(char *nve_block, int mode)
+{
+    int ch, len;
+    size_t offsets[6];
+    FILE *fp;
+    int i = 0, count = 0;
+    unsigned char on = 0x1;
+    unsigned char off = 0x0;
+
+    fp = fopen(nve_block, "r+b");
+    len = strlen(FBLOCK_ENTRY);
+    
+    if (fp == NULL)
+        return -1;
+
+    // find 7 entries
+    printf("[?] Searching for FBLOCK entries...\n");
+    for(;;)
+    {
+        if (EOF == (ch = fgetc(fp))) break;
+        if ((char)ch != *FBLOCK_ENTRY) continue;
+        
+        for(i = 1; i < len ; ++i)
+        {
+            if (EOF == (ch = fgetc(fp))) goto write;
+            
+            if ((char)ch != FBLOCK_ENTRY[i])
+            {
+                fseek(fp, 1-i, SEEK_CUR);
+                goto next;
+            }
+        }
+
+        printf("set 0x%02zx to %d\n", ftell(fp) + FBLOCK_GAP_SPACE, mode);
+        fseek(fp, ftell(fp) + FBLOCK_GAP_SPACE, SEEK_SET);
+        if (mode == 0)
+            fwrite(&off, sizeof(off), 1, fp);
+        else if (mode == 1)
+            fwrite(&on, sizeof(on), 1, fp);
+
+        next: ;
+    }
+write:
+    fclose(fp);
+    return 0;
+}
+
 char *nve_read_by_offset(char *nve_block, size_t offset)
 {
     FILE *fd;

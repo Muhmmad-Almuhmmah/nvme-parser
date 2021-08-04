@@ -8,6 +8,12 @@
 #define MAX_GAP_SPACE 20
 
 /*
+ * FBLOCK defines used by nve_set_fblock
+ */
+#define FBLOCK_ENTRY "FBLOCK"
+#define FBLOCK_GAP_SPACE 6
+
+/*
  * The huawei NVME image resides in a block under the /dev folder.
  * Since most phones (nowadays) follow the standard partition scheme, 
  * instead of trying to find the block, try these two routes and ask

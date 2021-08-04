@@ -64,5 +64,6 @@ void __show_usage(void) {
     printf("  -w <name> <value> | write desired <value> to nvme.\n");
     printf("  -b <path>         | backup the raw nvme block to <path>.\n");
     printf("  -e <path>         | write <path> backup to the nvme block.\n");
+    printf("  -f <value>        | set the FBLOCK status.\n");
     exit(1);
 }

@@ -6,5 +6,6 @@ int nve_check_header(char *nve_block);
 int nve_calc_space(char *value);
 char *nve_read_by_offset(char *nve_block, size_t offset);
 int nve_write_by_offset(char *nve_block, size_t offset, char *data);
+int nve_set_fblock(char *nve_block, int mode);
 
 #endif

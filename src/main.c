@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
     char *backup_src = malloc(BUFFER_SIZE);
     char *nve_block;
     size_t offset;
+    int fblock_value;
 
     if ((argc < 2) || strstr(argv[1], "-h"))
     {
@@ -68,7 +69,7 @@ int main(int argc, char *argv[])
                 printf("[-] Bad value name: %s.\n", argv[2]);
                 return -1;
             }
-            
+
             printf("[+] Found value name offset at 0x%02zx!\n", offset);
             printf("[+] %s => %s\n", argv[2], nve_read_by_offset(nve_block, offset));
             return 0;
@@ -97,6 +98,12 @@ int main(int argc, char *argv[])
             else
             {
                 nve_block = __find_block();
+            }
+
+            if (strstr(argv[2], "FBLOCK") != 0)
+            {
+                printf("[?] Did you mean: %s -f <1|0>?\n", argv[0]);
+                return 0; // no error
             }
 
             if (!__file_exists(nve_block))
@@ -230,6 +237,66 @@ int main(int argc, char *argv[])
             {
                 printf("[-] Something went wrong while trying to restore the nvme block :(!\n");
                 return -1;
+            }
+        }
+        else
+        {
+            printf("[-] Couldn't find a suitable nvme block. Please specify it :(!\n");
+            return -1;
+        }
+    }
+    
+    else if(strstr(argv[1], "-f"))
+    {
+        if (argc < 3)
+        {
+            printf("[-] Missing param: <1|0>!\n");
+            return -1;
+        }
+        
+        fblock_value = atoi(argv[2]);
+        
+        if (fblock_value != 0 && fblock_value != 1)
+        {
+            printf("[-] Invalid FBLOCK value: %s!\n", argv[2]);
+            return 0;
+        }
+        
+        if (__find_block() != NULL || argc == 4)
+        {
+            if (argc == 4) 
+            {
+                nve_block = argv[3];
+            }
+            else
+            {
+                nve_block = __find_block();
+            }
+
+            if (!__file_exists(nve_block))
+            {
+                printf("[-] Bad nvme block: %s!\n", nve_block);
+                return -1;
+            }
+  
+            if (nve_check_header(nve_block) != 0)
+            {
+                printf("[-] Your nvme looks corrupted and/or invalid :(!\n");
+                return -1;
+            }
+            
+            printf("[*] Waiting 5 seconds before writing %s to FBLOCK. If this is not what you want, CANCEL NOW!\n", argv[2]);     
+            sleep(5); 
+   
+            if (nve_set_fblock(nve_block, fblock_value) != 0)
+            {
+                printf("[-] Something went wrong while setting FBLOCK to %d :(!\n", fblock_value);
+                return -1;
+            }
+            else
+            {
+                printf("[+] Successfully set FBLOCK to %d!\n", fblock_value);
+                return 0;
             }
         }
         else
