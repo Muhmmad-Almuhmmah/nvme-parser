@@ -20,7 +20,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 
-#include "config.h"
+#include "common.h"
 #include "helper.h"
 #include "nve.h"
 
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     {
         __show_usage();
     }
-    
+
     if (strstr(argv[1], "-r"))
     {
         if (__find_block() != NULL || argc == 4)

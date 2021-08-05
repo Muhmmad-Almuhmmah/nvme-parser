@@ -22,7 +22,7 @@
 
 #include <sys/stat.h>
 
-#include "config.h"
+#include "common.h"
 #include "nve.h"
 
 bool __file_exists(char *filename) {

@@ -53,4 +53,10 @@ NVE_partition_header *nve_read_header_info(char *nve_block);
  */
 #define NVE_HDR_OFFSET 0x0FFF80
 
+/*
+ * FBLOCK defines used by nve_set_fblock
+ */
+#define FBLOCK_ENTRY "FBLOCK"
+#define FBLOCK_GAP_SPACE 6
+
 #endif

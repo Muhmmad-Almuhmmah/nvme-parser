@@ -26,8 +26,8 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 
-#include "config.h"
 #include "helper.h"
+#include "common.h"
 #include "nve.h"
 
 size_t nve_get_offset(char *nve_block, char *value)
