@@ -23,6 +23,7 @@
 #include <sys/stat.h>
 
 #include "config.h"
+#include "nve.h"
 
 bool __file_exists(char *filename) {
     struct stat buffer;
@@ -65,5 +66,6 @@ void __show_usage(void) {
     printf("  -b <path>         | backup the raw nvme block to <path>.\n");
     printf("  -e <path>         | write <path> backup to the nvme block.\n");
     printf("  -f <value>        | set the FBLOCK status.\n");
+    printf("  -z                | read and print the NVME image header.\n");
     exit(1);
 }

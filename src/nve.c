@@ -28,6 +28,7 @@
 
 #include "config.h"
 #include "helper.h"
+#include "nve.h"
 
 size_t nve_get_offset(char *nve_block, char *value)
 {
@@ -146,6 +147,31 @@ int nve_write_by_offset(char* nve_block, size_t offset, char *data)
    
     close(fd);
     return 0;
+}
+
+NVE_partition_header *nve_read_header_info(char *nve_block)
+{
+    FILE *fd;
+    NVE_partition_header *nve_header = malloc(sizeof(NVE_partition_header));
+    int i;
+    
+    fd = fopen(nve_block, "r");
+    if (fd == NULL)
+        return NULL;
+    
+    fseek(fd, NVE_HDR_OFFSET, SEEK_SET); // 0x0FFF80 ?
+    fread(&nve_header->nve_partition_name, sizeof(nve_header->nve_partition_name), 1, fd);
+    fread(&nve_header->nve_version, sizeof(nve_header->nve_version), 1, fd);
+    fread(&nve_header->nve_block_id, sizeof(nve_header->nve_block_id), 1, fd);
+    fread(&nve_header->nve_block_count, sizeof(nve_header->nve_block_count), 1, fd);
+    fread(&nve_header->valid_items, sizeof(nve_header->valid_items), 1, fd);
+    fread(&nve_header->nv_checksum, sizeof(nve_header->nv_checksum), 1, fd);
+    fread(&nve_header->nve_block_id, sizeof(nve_header->nve_block_id), 1, fd);
+    fread(&nve_header->reserved, sizeof(nve_header->reserved), 1, fd);
+    fread(&nve_header->nve_age, sizeof(nve_header->nve_age), 1, fd);
+    
+    fclose(fd);
+    return nve_header;
 }
 
 int nve_calc_space(char *value) {

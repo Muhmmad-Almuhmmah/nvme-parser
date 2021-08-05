@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
     char *nve_block;
     size_t offset;
     int fblock_value;
+    NVE_partition_header *nve_header;
 
     if ((argc < 2) || strstr(argv[1], "-h"))
     {
@@ -305,6 +306,61 @@ int main(int argc, char *argv[])
             return -1;
         }
     }
+    
+    else if(strstr(argv[1], "-z"))
+    {
+        if (__find_block() != NULL || argc == 3)
+        {
+            if (argc == 3) 
+            {
+                nve_block = argv[2];
+            }
+            else
+            {
+                nve_block = __find_block();
+            }
+
+            if (!__file_exists(nve_block))
+            {
+                printf("[-] Bad nvme block: %s!\n", nve_block);
+                return -1;
+            }
+  
+            if (nve_check_header(nve_block) != 0)
+            {
+                printf("[-] Your nvme looks corrupted and/or invalid :(!\n");
+                return -1;
+            }
+            
+            nve_header = nve_read_header_info(nve_block);
+            
+            if (nve_header == NULL)
+            {
+                printf("[-] Something went wrong while trying to read nvme header :(!\n");
+                return -1;
+            }
+            else
+            {
+                printf("~~~~~~~~~~~~~~~~~ NVME HEADER INFO ~~~~~~~~~~~~~~~~~\n");
+                printf("[?] -> NVME Partition Name: %s\n", nve_header->nve_partition_name);
+                printf("[?] -> NVME Version: %d\n", nve_header->nve_version);
+                printf("[?] -> NVME Block ID: %d\n", nve_header->nve_block_id);
+                printf("[?] -> NVME Block Count: %d\n", nve_header->nve_block_count);
+                printf("[?] -> NVME Valid Items: %d\n", nve_header->valid_items);
+                printf("[?] -> NVME Checksum: %d\n", nve_header->nv_checksum);
+                printf("[?] -> NVME Age: %d\n", nve_header->nve_age);
+                printf("~~~~~~~~~~~~~~~~~ NVME HEADER INFO ~~~~~~~~~~~~~~~~~\n");
+                return 0;
+            }
+        }
+        else
+        {
+            printf("[-] Couldn't find a suitable nvme block. Please specify it :(!\n");
+            return -1;
+        }
+     
+    }
+
     return 0;
 }
     

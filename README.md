@@ -21,7 +21,8 @@ Read, write, parse and dump your nvme block through adb!
 * Write NVME values => `./nvme -w VALUE_NAME NEW_VALUE`
 * Dump the NVME block (dd) => `./nvme -b dump_path`
 * Restore NVME dump (dd) => `./nvme -e backup_path`
-* Set FBLOCK status `./nvme -f <1|0>` (_dangerous option, proceed with caution_).
+* Set FBLOCK status => `./nvme -f <1|0>` (_dangerous option, proceed with caution_).
+* Read NVME header info => `./nvme -z`
 
 ## 💻 Building the tool
 * If you want to compile this tool, you will need the android NDK kit.
