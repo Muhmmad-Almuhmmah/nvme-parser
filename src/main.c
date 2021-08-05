@@ -63,16 +63,11 @@ int main(int argc, char *argv[])
                 return -1;
             }
 
-            offset = nve_get_offset(nve_block, argv[2]) + strlen(argv[2]) + nve_calc_space(argv[2]);
-            
-            if (offset == 19) // -1
+            if (nve_read_value(nve_block, argv[2]) != 0)
             {
-                printf("[-] Bad value name: %s.\n", argv[2]);
+                printf("[-] Something went wrong while trying to read %s :(\n", argv[2]);
                 return -1;
             }
-
-            printf("[+] Found value name offset at 0x%02zx!\n", offset);
-            printf("[+] %s => %s\n", argv[2], nve_read_by_offset(nve_block, offset));
             return 0;
         }
         else
@@ -118,24 +113,8 @@ int main(int argc, char *argv[])
                 printf("[-] Your device's nvme looks corrupted and/or invalid :(!\n");
                 return -1;
             }
-        
-            offset = nve_get_offset(nve_block, argv[2]) + strlen(argv[2]) + nve_calc_space(argv[2]);
             
-            if (offset == 19) // -1
-            {
-                printf("[-] Bad value name: %s.\n", argv[2]);
-                return -1;
-            }
-            
-            printf("[+] Found value name offset at 0x%02zx!\n", offset);
-            
-            if (strlen(argv[3]) != strlen(nve_read_by_offset(nve_block, offset)))
-            {
-                printf("[-] Invalid value length (should be %lu)!\n", strlen(nve_read_by_offset(nve_block, offset)));
-                return -1;
-            }
-            
-            if (nve_write_by_offset(nve_block, offset, argv[3]) != 0)
+            if (nve_write_value(nve_block, argv[2], argv[3]) != 0)
             {
                 printf("[-] Something went wrong while trying to set %s!\n", argv[2]);
                 return -1;

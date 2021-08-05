@@ -58,7 +58,7 @@ size_t nve_get_offset(char *nve_block, char *value)
 int nve_set_fblock(char *nve_block, int mode)
 {
     int ch, len;
-    size_t offsets[6];
+    size_t offset = 0;
     FILE *fp;
     int i = 0, count = 0;
     unsigned char on = 0x1;
@@ -70,8 +70,6 @@ int nve_set_fblock(char *nve_block, int mode)
     if (fp == NULL)
         return -1;
 
-    // find 7 entries
-    printf("[?] Searching for FBLOCK entries...\n");
     for(;;)
     {
         if (EOF == (ch = fgetc(fp))) break;
@@ -79,7 +77,7 @@ int nve_set_fblock(char *nve_block, int mode)
         
         for(i = 1; i < len ; ++i)
         {
-            if (EOF == (ch = fgetc(fp))) goto write;
+            if (EOF == (ch = fgetc(fp))) goto exit;
             
             if ((char)ch != FBLOCK_ENTRY[i])
             {
@@ -88,8 +86,9 @@ int nve_set_fblock(char *nve_block, int mode)
             }
         }
 
-        printf("set 0x%02zx to %d\n", ftell(fp) + FBLOCK_GAP_SPACE, mode);
-        fseek(fp, ftell(fp) + FBLOCK_GAP_SPACE, SEEK_SET);
+        offset = ftell(fp) + FBLOCK_GAP_SPACE;
+        fseek(fp, offset, SEEK_SET);
+
         if (mode == 0)
             fwrite(&off, sizeof(off), 1, fp);
         else if (mode == 1)
@@ -97,56 +96,103 @@ int nve_set_fblock(char *nve_block, int mode)
 
         next: ;
     }
-write:
+exit:
     fclose(fp);
-    return 0;
+    return (offset != 0 ? 0 : -1);
 }
 
-char *nve_read_by_offset(char *nve_block, size_t offset)
+int nve_write_value(char *nve_block, char *name, char *value)
 {
-    FILE *fd;
-    char c[1];
-    size_t pos;
-    char *value = malloc(BUFFER_SIZE);
-    
-    fd = fopen(nve_block, "r");
-    if (fd < 0)
-        return NULL;
-     
-    fseek(fd, offset, SEEK_SET);
-    fread(&c, sizeof(char), 1, fd);
-    snprintf(value, BUFFER_SIZE, "%s", c);
-    
-    while (c[0] != '\0')
-    {
-        fread(&c, sizeof(char), 1, fd);
-        snprintf(value, BUFFER_SIZE, "%s%s", value, c);
-    }
-    
-    fclose(fd);
-    
-    return value;
-}
+    int ch, len, i = 0, j = 0, count = 0;
+    FILE *fp;
+    size_t offset = 0;
 
-int nve_write_by_offset(char* nve_block, size_t offset, char *data)
-{
-    int fd;
-    char data_initial;
+    fp = fopen(nve_block, "r+b");
+    len = strlen(name);
     
-    fd = open(nve_block, O_CREAT|O_RDWR, S_IRUSR|S_IWUSR);
-    if (fd < 0)
+    if (fp == NULL)
         return -1;
-    
-    lseek(fd, offset, SEEK_SET);
-    
-    for (int k = 0; k < strlen(data); k++)
+
+    for(;;)
     {
-        data_initial = data[k];
-        write(fd, &data[k], 1);
+        if (EOF == (ch = fgetc(fp))) break;
+        if ((char)ch != *name) continue;
+        
+        for(i = 1; i < len ; ++i)
+        {
+            if (EOF == (ch = fgetc(fp))) goto exit;
+            
+            if ((char)ch != name[i])
+            {
+                fseek(fp, 1-i, SEEK_CUR);
+                goto next;
+            }
+        }
+
+        offset = ftell(fp) + nve_calc_space(name);
+        printf("[?] Found %s at 0x%02zx!\n", name, offset);
+        
+        fseek(fp, offset, SEEK_SET);
+        for (j = 0; j < strlen(value); j++)
+        {
+            fwrite(&value[j], 1, 1, fp);
+        }
+        next: ;
     }
-   
-    close(fd);
-    return 0;
+exit:
+    fclose(fp);
+    return (offset != 0 ? 0 : -1);
+}
+
+int nve_read_value(char *nve_block, char *name)
+{
+    int ch, len, i = 0, j = 0, count = 0;
+    FILE *fp;
+    size_t offset;
+    char c[1];
+    char *value = malloc(BUFFER_SIZE);
+
+    fp = fopen(nve_block, "r+b");
+    len = strlen(name);
+    
+    if (fp == NULL)
+        return -1;
+
+    for(;;)
+    {
+        if (EOF == (ch = fgetc(fp))) break;
+        if ((char)ch != *name) continue;
+        
+        for(i = 1; i < len ; ++i)
+        {
+            if (EOF == (ch = fgetc(fp))) goto exit;
+            
+            if ((char)ch != name[i])
+            {
+                fseek(fp, 1-i, SEEK_CUR);
+                goto next;
+            }
+        }
+
+        offset = ftell(fp) + nve_calc_space(name);
+        fseek(fp, offset, SEEK_SET);
+        fread(&c, sizeof(char), 1, fp);
+        snprintf(value, BUFFER_SIZE, "%s", c);
+        
+        while (c[0] != '\0')
+        {
+            fread(&c, sizeof(char), 1, fp);
+            snprintf(value, BUFFER_SIZE, "%s%s", value, c);
+        }
+        
+        printf("[?] %s -> %s (0x%02zx)\n", name, value, offset);
+        value = malloc(BUFFER_SIZE);
+    
+        next: ;
+    }
+exit:
+    fclose(fp);
+    return (offset != 0 ? 0 : -1);
 }
 
 NVE_partition_header *nve_read_header_info(char *nve_block)
