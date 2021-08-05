@@ -22,7 +22,7 @@
 
 #include "config.h"
 #include "helper.h"
-#include "nvme.h"
+#include "nve.h"
 
 int main(int argc, char *argv[])
 {

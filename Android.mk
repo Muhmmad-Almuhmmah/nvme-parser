@@ -9,7 +9,7 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_SRC_FILES := \
     src/main.c \
-    src/nvme.c \
+    src/nve.c \
     src/helper.c
 
 LOCAL_CFLAGS += -Wno-int-conversion
