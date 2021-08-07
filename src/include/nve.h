@@ -18,6 +18,20 @@ typedef struct
 } NVE_partition_header;
 
 /*
+ * This struct, is used for get NV 
+ * partition information.
+ */
+typedef struct 
+{
+    unsigned int nv_number;
+    char nv_name[8];
+    unsigned int nv_property;
+    unsigned int valid_size;
+    unsigned int reserved;
+    char nv_data[104];
+} NV_items_struct;
+
+/*
  * All the nvme-related functions are listed here.
  */
 size_t nve_get_offset(char *nve_block, char *value);

@@ -150,7 +150,7 @@ int nve_read_value(char *nve_block, char *name)
     FILE *fp;
     size_t offset;
     char c[1];
-    char *value = malloc(BUFFER_SIZE);
+    NV_items_struct *nve_item = malloc(sizeof(NV_items_struct));
 
     fp = fopen(nve_block, "r+b");
     len = strlen(name);
@@ -158,6 +158,7 @@ int nve_read_value(char *nve_block, char *name)
     if (fp == NULL)
         return -1;
 
+    printf("~~~~~~~~~~~~~~~~~ NVME ITEM INFO ~~~~~~~~~~~~~~~~~\n");
     for(;;)
     {
         if (EOF == (ch = fgetc(fp))) break;
@@ -174,23 +175,24 @@ int nve_read_value(char *nve_block, char *name)
             }
         }
 
-        offset = ftell(fp) + nve_calc_space(name);
+        offset = ftell(fp) - strlen(name) - 4; // we also care about nv_number
         fseek(fp, offset, SEEK_SET);
-        fread(&c, sizeof(char), 1, fp);
-        snprintf(value, BUFFER_SIZE, "%s", c);
-        
-        while (c[0] != '\0')
-        {
-            fread(&c, sizeof(char), 1, fp);
-            snprintf(value, BUFFER_SIZE, "%s%s", value, c);
-        }
-        
-        printf("[?] %s -> %s (0x%02zx)\n", name, value, offset);
-        value = malloc(BUFFER_SIZE);
-    
+        fread(&nve_item->nv_number, sizeof(nve_item->nv_number), 1, fp);
+        fread(&nve_item->nv_name, sizeof(nve_item->nv_name), 1, fp);
+        fread(&nve_item->nv_property, sizeof(nve_item->nv_property), 1, fp);
+        fread(&nve_item->valid_size, sizeof(nve_item->valid_size), 1, fp);
+        fread(&nve_item->reserved, sizeof(nve_item->reserved), 1, fp);
+        fread(&nve_item->nv_data, sizeof(nve_item->nv_data), 1, fp);
+        printf("[?] -> NV Number: %d (0x%02zx)\n", nve_item->nv_number, offset);
+        printf("[?] -> NV Name: %s (0x%02zx)\n", nve_item->nv_name, offset);
+        printf("[?] -> NV Property: %d (0x%02zx)\n", nve_item->nv_property, offset);
+        printf("[?] -> NV Valid Size: %d (0x%02zx)\n", nve_item->valid_size, offset);
+        printf("[?] -> NV Reserved: %d (0x%02zx)\n", nve_item->reserved, offset);
+        printf("[?] -> NV Data: %s (0x%02zx)\n", nve_item->nv_data, offset);
         next: ;
     }
 exit:
+    printf("~~~~~~~~~~~~~~~~~ NVME ITEM INFO ~~~~~~~~~~~~~~~~~\n");
     fclose(fp);
     return (offset != 0 ? 0 : -1);
 }
