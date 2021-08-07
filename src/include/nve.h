@@ -38,7 +38,7 @@ size_t nve_get_offset(char *nve_block, char *value);
 int nve_check_header(char *nve_block);
 int nve_calc_space(char *value);
 int nve_write_value(char *nve_block, char *name, char *value);
-int nve_read_value(char *nve_block, char *name);
+int nve_read_item(char *nve_block, char *name);
 int nve_set_fblock(char *nve_block, int mode);
 NVE_partition_header *nve_read_header_info(char *nve_block);
 

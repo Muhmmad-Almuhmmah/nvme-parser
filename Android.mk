@@ -12,7 +12,7 @@ LOCAL_SRC_FILES := \
     src/nve.c \
     src/helper.c
 
-LOCAL_CFLAGS += -Wno-int-conversion
+LOCAL_CFLAGS += -Wno-int-conversion -Wno-pointer-bool-conversion
 
 include $(BUILD_EXECUTABLE)
 

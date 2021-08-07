@@ -10,6 +10,7 @@ Read, write, parse and dump your nvme block through adb!
 * Avoid modifying encrypted values ​​(FBLOCK, WVLOCK, FRPLOCK, etc). These values can be only rewritten with their SHA256 hash.
 * When reporting an issue, make sure to hide sensitive information (such as S/N, MACs, etc).
 * If the tool isn't able to find a valid nvme block, you'll need to provide it as the last argument.
+* Huawei Phones with newer SoCs (Kirin 970 or newer) aren't supported by the tool.
 
 ## 📜 Requirements
 * Huawei phone.

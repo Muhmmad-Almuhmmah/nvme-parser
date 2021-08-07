@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
                 return -1;
             }
 
-            if (nve_read_value(nve_block, argv[2]) != 0)
+            if (nve_read_item(nve_block, argv[2]) != 0)
             {
                 printf("[-] Something went wrong while trying to read %s :(\n", argv[2]);
                 return -1;

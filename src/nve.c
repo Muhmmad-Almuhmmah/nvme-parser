@@ -58,11 +58,12 @@ size_t nve_get_offset(char *nve_block, char *value)
 int nve_set_fblock(char *nve_block, int mode)
 {
     int ch, len;
-    size_t offset = 0;
+    size_t offset = 0, crc_offset;
     FILE *fp;
     int i = 0, count = 0;
     unsigned char on = 0x1;
     unsigned char off = 0x0;
+    unsigned char crc[4];
 
     fp = fopen(nve_block, "r+b");
     len = strlen(FBLOCK_ENTRY);
@@ -86,7 +87,27 @@ int nve_set_fblock(char *nve_block, int mode)
             }
         }
 
+        /* 
+         * Check the CRC of the NV entry and avoid editing NVME
+         * on newer SoCs (where doing so hard bricks the device)
+         */
         offset = ftell(fp) + FBLOCK_GAP_SPACE;
+        crc_offset = ftell(fp) - strlen(FBLOCK_ENTRY) + 16;
+
+        fseek(fp, crc_offset, SEEK_SET);
+        fread(&crc, sizeof(crc), 1, fp);
+        //printf("%s\n", crc);
+        
+        if (crc && !crc[0])
+        {
+            /* No valid CRC was found, we can write NVME without problems */
+        }
+        else
+        {
+            printf("[?] Can't write to the NVME image (too new?)\n");
+            return -1;
+        }
+
         fseek(fp, offset, SEEK_SET);
 
         if (mode == 0)
@@ -105,7 +126,8 @@ int nve_write_value(char *nve_block, char *name, char *value)
 {
     int ch, len, i = 0, j = 0, count = 0;
     FILE *fp;
-    size_t offset = 0;
+    size_t offset = 0, crc_offset;
+    unsigned char crc[4];
 
     fp = fopen(nve_block, "r+b");
     len = strlen(name);
@@ -129,9 +151,28 @@ int nve_write_value(char *nve_block, char *name, char *value)
             }
         }
 
-        offset = ftell(fp) + nve_calc_space(name);
-        printf("[?] Found %s at 0x%02zx!\n", name, offset);
+        /* 
+         * Check against the CRC of the NV entry and avoid editing NVME
+         * on newer SoCs (where doing so hard bricks the device)
+         */
+        offset = ftell(fp) + nve_calc_space(name); // we also care about nv_number
+        crc_offset = ftell(fp) - strlen(name) + 16;
+
+        fseek(fp, crc_offset, SEEK_SET);
+        fread(&crc, sizeof(crc), 1, fp);
+        //printf("%s\n", crc);
         
+        if (crc && !crc[0])
+        {
+            /* No valid CRC was found, we can write NVME without problems */
+        }
+        else
+        {
+            printf("[?] Can't write to the NVME image (too new?)\n");
+            return -1;
+        }
+
+        printf("[?] Found %s at 0x%02zx!\n", name, offset);
         fseek(fp, offset, SEEK_SET);
         for (j = 0; j < strlen(value); j++)
         {
@@ -144,7 +185,7 @@ exit:
     return (offset != 0 ? 0 : -1);
 }
 
-int nve_read_value(char *nve_block, char *name)
+int nve_read_item(char *nve_block, char *name)
 {
     int ch, len, i = 0, j = 0, count = 0;
     FILE *fp;
