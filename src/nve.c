@@ -118,6 +118,7 @@ int nve_set_fblock(char *nve_block, int mode)
         next: ;
     }
 exit:
+    fflush(fp);
     fclose(fp);
     return (offset != 0 ? 0 : -1);
 }
@@ -181,6 +182,7 @@ int nve_write_value(char *nve_block, char *name, char *value)
         next: ;
     }
 exit:
+    fflush(fp);
     fclose(fp);
     return (offset != 0 ? 0 : -1);
 }
